@@ -17,7 +17,6 @@ The project focuses only on **frontend UI design** (no backend functionality).
 - Lucide Icons  
 - CSS Animations
 
-<img width="1920" height="1080" alt="Screenshot (140)" src="https://github.com/user-attachments/assets/88ccdf04-53a1-46bf-8834-4bb9d51ce7c0" />
 
 <img width="1648" height="860" alt="Screenshot 2026-01-30 002942" src="https://github.com/user-attachments/assets/a212b93e-4825-4267-a469-53b611abf7c6" />
 
