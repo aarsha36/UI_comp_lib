@@ -1,12 +1,17 @@
-# React + Vite
+# Bootstrap UI Design Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a simple React project demonstrating a clean **UI design using Bootstrap**.
 
-Currently, two official plugins are available:
+## Features
+- Responsive Navbar with gradient header  
+- Contact Form layout  
+- Bootstrap styled input and textarea  
+- Modern card-like form design  
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technologies Used
+- React.js  
+- Bootstrap  
+- Inline CSS Styling
 
-## Expanding the ESLint configuration
+<img width="1917" height="858" alt="Screenshot 2026-01-29 234525" src="https://github.com/user-attachments/assets/58febd37-5066-4036-8dfe-91465a3b010b" />
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
