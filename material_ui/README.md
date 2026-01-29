@@ -1,12 +1,16 @@
-# React + Vite
+# Material UI Component Demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a simple React project that demonstrates the use of **Material UI (MUI)** components.
 
-Currently, two official plugins are available:
+## Features
+- Material UI TextField
+- Material UI Button
+- Clean centered UI layout
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technologies Used
+- React.js
+- Material UI
+- CSS
 
-## Expanding the ESLint configuration
+<img width="1916" height="855" alt="Screenshot 2026-01-30 000625" src="https://github.com/user-attachments/assets/c3bbc17f-8470-4200-8587-bf9a8974386b" />
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
