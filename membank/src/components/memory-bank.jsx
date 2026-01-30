@@ -128,6 +128,19 @@ const MemoryBank = () => {
   const [currentSnippet, setCurrentSnippet] = useState(0);
   const [memoryList, setMemoryList] = useState(initialMemories);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  
+  // Form state for adding new memory
+  const [newMemory, setNewMemory] = useState({
+    title: '',
+    date: '',
+    description: '',
+    image: null,
+    imagePreview: '',
+    snippets: []
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -152,6 +165,122 @@ const MemoryBank = () => {
     });
   };
 
+  const handleImageUpload = (e, isSnippet = false) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (isSnippet) {
+          setNewMemory(prev => ({
+            ...prev,
+            snippets: [...prev.snippets, { image: reader.result, caption: '' }]
+          }));
+        } else {
+          setNewMemory(prev => ({
+            ...prev,
+            image: file,
+            imagePreview: reader.result
+          }));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmitMemory = () => {
+    if (newMemory.title && newMemory.date && newMemory.imagePreview) {
+      const memory = {
+        id: memoryList.length + 1,
+        title: newMemory.title,
+        date: newMemory.date,
+        description: newMemory.description,
+        image: newMemory.imagePreview,
+        favorite: false,
+        snippets: newMemory.snippets.length > 0 ? newMemory.snippets : [
+          { image: newMemory.imagePreview, caption: 'Main photo' }
+        ]
+      };
+      
+      setMemoryList([memory, ...memoryList]);
+      setShowAddModal(false);
+      setNewMemory({
+        title: '',
+        date: '',
+        description: '',
+        image: null,
+        imagePreview: '',
+        snippets: []
+      });
+    }
+  };
+
+  // Modal Component
+  const Modal = ({ isOpen, onClose, title, children, width = '600px' }) => {
+    if (!isOpen) return null;
+    
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 2000,
+        padding: '20px'
+      }} onClick={onClose}>
+        <div style={{
+          background: 'linear-gradient(145deg, #f5deb3, #f4e4c1)',
+          borderRadius: '20px',
+          padding: '40px',
+          maxWidth: width,
+          width: '100%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+          border: '6px solid #8b6f47',
+          position: 'relative'
+        }} onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: 'linear-gradient(135deg, #d4a574, #c19a6b)',
+              border: '2px solid #8b6f47',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              fontSize: '24px',
+              color: '#3d2817',
+              fontWeight: 'bold'
+            }}
+          >
+            ×
+          </button>
+          <h2 style={{
+            fontSize: '32px',
+            fontWeight: '600',
+            color: '#3d2817',
+            marginBottom: '30px',
+            fontFamily: '"Crimson Pro", serif'
+          }}>
+            {title}
+          </h2>
+          {children}
+        </div>
+      </div>
+    );
+  };
+
   const navigateSnippet = (direction) => {
     if (!selectedMemory) return;
     const newIndex = currentSnippet + direction;
@@ -164,7 +293,7 @@ const MemoryBank = () => {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #f5e6d3 0%, #d4a574 50%, #8c785f 100%)',
+        background: 'linear-gradient(135deg, #f5e6d3 0%, #d4a574 50%, #8b7355 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -220,7 +349,7 @@ const MemoryBank = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'radial-gradient(circle, transparent 30%, rgba(35, 34, 34, 0.3) 100%)',
+          background: 'radial-gradient(circle, transparent 30%, rgba(0,0,0,0.3) 100%)',
           pointerEvents: 'none',
           zIndex: 1
         }} />
@@ -420,7 +549,7 @@ const MemoryBank = () => {
             }}>
               <button
                 className="nav-item"
-                onClick={() => alert('Add New Memory feature coming soon!')}
+                onClick={() => setShowAddModal(true)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -451,7 +580,7 @@ const MemoryBank = () => {
 
               <button
                 className="nav-item"
-                onClick={() => alert('Settings feature coming soon!')}
+                onClick={() => setShowSettingsModal(true)}
                 style={{
                   padding: '10px',
                   background: 'rgba(212, 165, 116, 0.2)',
@@ -476,7 +605,7 @@ const MemoryBank = () => {
 
               <button
                 className="nav-item"
-                onClick={() => alert('Profile feature coming soon!')}
+                onClick={() => setShowProfileModal(true)}
                 style={{
                   padding: '10px',
                   background: 'linear-gradient(135deg, #d4a574, #c19a6b)',
@@ -836,6 +965,7 @@ const MemoryBank = () => {
   }
 
   return (
+    <>
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #f5e6d3 0%, #d4a574 50%, #8b7355 100%)',
@@ -939,7 +1069,7 @@ const MemoryBank = () => {
           }}>
             <button
               className="nav-item"
-              onClick={() => alert('Add New Memory feature coming soon!')}
+              onClick={() => setShowAddModal(true)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -970,7 +1100,7 @@ const MemoryBank = () => {
 
             <button
               className="nav-item"
-              onClick={() => alert('Settings feature coming soon!')}
+              onClick={() => setShowSettingsModal(true)}
               style={{
                 padding: '10px',
                 background: 'rgba(212, 165, 116, 0.2)',
@@ -995,7 +1125,7 @@ const MemoryBank = () => {
 
             <button
               className="nav-item"
-              onClick={() => alert('Profile feature coming soon!')}
+              onClick={() => setShowProfileModal(true)}
               style={{
                 padding: '10px',
                 background: 'linear-gradient(135deg, #d4a574, #c19a6b)',
@@ -1241,8 +1371,683 @@ const MemoryBank = () => {
             ))}
           </div>
         </div>
+
+        {/* Footer Section */}
+        <footer style={{
+          marginTop: '80px',
+          padding: '60px 0 30px',
+          background: 'linear-gradient(to bottom, transparent, rgba(61, 40, 23, 0.3))',
+          borderTop: '2px solid #8b6f47'
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '40px',
+            marginBottom: '40px'
+          }}>
+            {/* About Section */}
+            <div>
+              <h4 style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#3d2817',
+                marginBottom: '15px',
+                fontFamily: '"Crimson Pro", serif'
+              }}>
+                About Memory Bank
+              </h4>
+              <p style={{
+                fontSize: '14px',
+                color: '#5c4033',
+                lineHeight: '1.8'
+              }}>
+                Preserving your precious moments in a beautiful, timeless format. Memory Bank helps you cherish and relive your favorite memories with style.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#3d2817',
+                marginBottom: '15px',
+                fontFamily: '"Crimson Pro", serif'
+              }}>
+                Quick Links
+              </h4>
+              <ul style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0
+              }}>
+                {['Home', 'My Memories', 'Favorites', 'Timeline'].map((link) => (
+                  <li key={link} style={{ marginBottom: '10px' }}>
+                    <a href="#" style={{
+                      color: '#8b6f47',
+                      textDecoration: 'none',
+                      fontSize: '14px',
+                      transition: 'color 0.3s ease'
+                    }}
+                    onMouseOver={(e) => e.target.style.color = '#3d2817'}
+                    onMouseOut={(e) => e.target.style.color = '#8b6f47'}
+                    >
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h4 style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#3d2817',
+                marginBottom: '15px',
+                fontFamily: '"Crimson Pro", serif'
+              }}>
+                Support
+              </h4>
+              <ul style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0
+              }}>
+                {['Help Center', 'Privacy Policy', 'Terms of Service', 'Contact Us'].map((link) => (
+                  <li key={link} style={{ marginBottom: '10px' }}>
+                    <a href="#" style={{
+                      color: '#8b6f47',
+                      textDecoration: 'none',
+                      fontSize: '14px',
+                      transition: 'color 0.3s ease'
+                    }}
+                    onMouseOver={(e) => e.target.style.color = '#3d2817'}
+                    onMouseOut={(e) => e.target.style.color = '#8b6f47'}
+                    >
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#3d2817',
+                marginBottom: '15px',
+                fontFamily: '"Crimson Pro", serif'
+              }}>
+                Connect
+              </h4>
+              <p style={{
+                fontSize: '14px',
+                color: '#5c4033',
+                marginBottom: '10px'
+              }}>
+                info@memorybank.com
+              </p>
+              <div style={{ display: 'flex', gap: '15px', marginTop: '15px' }}>
+                {['Facebook', 'Twitter', 'Instagram'].map((social) => (
+                  <a key={social} href="#" style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'rgba(139, 111, 71, 0.2)',
+                    border: '2px solid #8b6f47',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#8b6f47',
+                    textDecoration: 'none',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = '#8b6f47';
+                    e.currentTarget.style.color = '#f5deb3';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'rgba(139, 111, 71, 0.2)';
+                    e.currentTarget.style.color = '#8b6f47';
+                  }}
+                  >
+                    {social[0]}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div style={{
+            textAlign: 'center',
+            paddingTop: '30px',
+            borderTop: '1px solid #d4a574',
+            color: '#8b6f47',
+            fontSize: '14px'
+          }}>
+            © 2026 Memory Bank. All rights reserved. Made with ❤️ for your memories.
+          </div>
+        </footer>
       </div>
     </div>
+
+    {/* Add Memory Modal */}
+    <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Add New Memory" width="700px">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Title Input */}
+        <div>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#3d2817' }}>
+            Memory Title *
+          </label>
+          <input
+            type="text"
+            value={newMemory.title}
+            onChange={(e) => setNewMemory({ ...newMemory, title: e.target.value })}
+            placeholder="e.g., Beach Sunset, Birthday Party"
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '2px solid #8b6f47',
+              fontSize: '16px',
+              fontFamily: '"Quicksand", sans-serif',
+              background: 'rgba(255, 255, 255, 0.8)'
+            }}
+          />
+        </div>
+
+        {/* Date Input */}
+        <div>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#3d2817' }}>
+            Date *
+          </label>
+          <input
+            type="date"
+            value={newMemory.date}
+            onChange={(e) => setNewMemory({ ...newMemory, date: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '2px solid #8b6f47',
+              fontSize: '16px',
+              fontFamily: '"Quicksand", sans-serif',
+              background: 'rgba(255, 255, 255, 0.8)'
+            }}
+          />
+        </div>
+
+        {/* Description */}
+        <div>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#3d2817' }}>
+            Description
+          </label>
+          <textarea
+            value={newMemory.description}
+            onChange={(e) => setNewMemory({ ...newMemory, description: e.target.value })}
+            placeholder="Tell the story of this memory..."
+            rows="4"
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '2px solid #8b6f47',
+              fontSize: '16px',
+              fontFamily: '"Quicksand", sans-serif',
+              background: 'rgba(255, 255, 255, 0.8)',
+              resize: 'vertical'
+            }}
+          />
+        </div>
+
+        {/* Main Image Upload */}
+        <div>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#3d2817' }}>
+            Main Photo *
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleImageUpload(e, false)}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '2px solid #8b6f47',
+              fontSize: '14px',
+              fontFamily: '"Quicksand", sans-serif',
+              background: 'rgba(255, 255, 255, 0.8)'
+            }}
+          />
+          {newMemory.imagePreview && (
+            <img
+              src={newMemory.imagePreview}
+              alt="Preview"
+              style={{
+                marginTop: '15px',
+                width: '100%',
+                height: '200px',
+                objectFit: 'cover',
+                borderRadius: '8px',
+                border: '3px solid #8b6f47'
+              }}
+            />
+          )}
+        </div>
+
+        {/* Additional Snippets */}
+        <div>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#3d2817' }}>
+            Additional Photos (Optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleImageUpload(e, true)}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '2px solid #8b6f47',
+              fontSize: '14px',
+              fontFamily: '"Quicksand", sans-serif',
+              background: 'rgba(255, 255, 255, 0.8)'
+            }}
+          />
+          {newMemory.snippets.length > 0 && (
+            <div style={{ display: 'flex', gap: '10px', marginTop: '15px', flexWrap: 'wrap' }}>
+              {newMemory.snippets.map((snippet, idx) => (
+                <div key={idx} style={{ position: 'relative' }}>
+                  <img
+                    src={snippet.image}
+                    alt={`Snippet ${idx + 1}`}
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      objectFit: 'cover',
+                      borderRadius: '8px',
+                      border: '2px solid #8b6f47'
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Caption"
+                    value={snippet.caption}
+                    onChange={(e) => {
+                      const updatedSnippets = [...newMemory.snippets];
+                      updatedSnippets[idx].caption = e.target.value;
+                      setNewMemory({ ...newMemory, snippets: updatedSnippets });
+                    }}
+                    style={{
+                      width: '100px',
+                      marginTop: '5px',
+                      padding: '5px',
+                      borderRadius: '4px',
+                      border: '1px solid #8b6f47',
+                      fontSize: '12px'
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmitMemory}
+          style={{
+            padding: '15px',
+            background: 'linear-gradient(135deg, #d4a574, #c19a6b)',
+            border: '2px solid #8b6f47',
+            borderRadius: '8px',
+            color: '#3d2817',
+            fontSize: '18px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+            transition: 'all 0.3s ease',
+            fontFamily: '"Quicksand", sans-serif'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+          }}
+        >
+          Save Memory
+        </button>
+      </div>
+    </Modal>
+
+    {/* Profile Modal */}
+    <Modal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} title="My Profile" width="800px">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+        {/* User Info */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px',
+          padding: '20px',
+          background: 'rgba(139, 111, 71, 0.1)',
+          borderRadius: '12px',
+          border: '2px solid #8b6f47'
+        }}>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #d4a574, #c19a6b)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '36px',
+            color: '#3d2817',
+            fontWeight: '600',
+            border: '3px solid #8b6f47'
+          }}>
+            JD
+          </div>
+          <div>
+            <h3 style={{ fontSize: '24px', color: '#3d2817', marginBottom: '5px', fontFamily: '"Crimson Pro", serif' }}>
+              John Doe
+            </h3>
+            <p style={{ color: '#8b6f47', fontSize: '14px' }}>john.doe@memorybank.com</p>
+            <p style={{ color: '#5c4033', fontSize: '14px', marginTop: '5px' }}>
+              Member since January 2024
+            </p>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
+          {[
+            { label: 'Total Memories', value: memoryList.length },
+            { label: 'Favorites', value: memoryList.filter(m => m.favorite).length },
+            { label: 'This Year', value: memoryList.filter(m => new Date(m.date).getFullYear() === 2024).length }
+          ].map((stat, idx) => (
+            <div key={idx} style={{
+              padding: '20px',
+              background: 'rgba(255, 255, 255, 0.5)',
+              borderRadius: '12px',
+              border: '2px solid #8b6f47',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '32px', fontWeight: '600', color: '#3d2817', marginBottom: '5px' }}>
+                {stat.value}
+              </div>
+              <div style={{ fontSize: '14px', color: '#8b6f47' }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Memory Calendar (simplified) */}
+        <div>
+          <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#3d2817', marginBottom: '15px' }}>
+            Memory Activity
+          </h4>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(12, 1fr)',
+            gap: '8px',
+            padding: '20px',
+            background: 'rgba(255, 255, 255, 0.5)',
+            borderRadius: '12px',
+            border: '2px solid #8b6f47'
+          }}>
+            {[...Array(52)].map((_, i) => {
+              const hasMemory = Math.random() > 0.7;
+              return (
+                <div key={i} style={{
+                  width: '100%',
+                  paddingTop: '100%',
+                  background: hasMemory ? '#8b6f47' : 'rgba(139, 111, 71, 0.2)',
+                  borderRadius: '3px',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseOver={(e) => {
+                  if (hasMemory) e.currentTarget.style.background = '#3d2817';
+                }}
+                onMouseOut={(e) => {
+                  if (hasMemory) e.currentTarget.style.background = '#8b6f47';
+                }}
+                />
+              );
+            })}
+          </div>
+          <p style={{ fontSize: '12px', color: '#8b6f47', marginTop: '10px', textAlign: 'center' }}>
+            Darker squares = more memories that week
+          </p>
+        </div>
+
+        {/* Places Visited */}
+        <div>
+          <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#3d2817', marginBottom: '15px' }}>
+            Places Visited ✓
+          </h4>
+          <div style={{
+            padding: '20px',
+            background: 'rgba(255, 255, 255, 0.5)',
+            borderRadius: '12px',
+            border: '2px solid #8b6f47'
+          }}>
+            {['Paris, France', 'Tokyo, Japan', 'New York, USA', 'Bali, Indonesia', 'Rome, Italy'].map((place) => (
+              <div key={place} style={{
+                padding: '12px',
+                marginBottom: '10px',
+                background: 'rgba(139, 111, 71, 0.1)',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                color: '#3d2817'
+              }}>
+                <span style={{ color: '#8b6f47', fontSize: '18px' }}>✓</span>
+                {place}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bucket List */}
+        <div>
+          <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#3d2817', marginBottom: '15px' }}>
+            Places to Visit 📍
+          </h4>
+          <div style={{
+            padding: '20px',
+            background: 'rgba(255, 255, 255, 0.5)',
+            borderRadius: '12px',
+            border: '2px solid #8b6f47'
+          }}>
+            {['Santorini, Greece', 'Machu Picchu, Peru', 'Iceland', 'Maldives', 'Switzerland'].map((place) => (
+              <div key={place} style={{
+                padding: '12px',
+                marginBottom: '10px',
+                background: 'rgba(139, 111, 71, 0.1)',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                color: '#5c4033'
+              }}>
+                <span style={{ color: '#d4a574', fontSize: '18px' }}>◯</span>
+                {place}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Modal>
+
+    {/* Settings Modal */}
+    <Modal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} title="Settings" width="600px">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+        {/* Account Settings */}
+        <div>
+          <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#3d2817', marginBottom: '15px' }}>
+            Account Settings
+          </h4>
+          <div style={{
+            padding: '20px',
+            background: 'rgba(255, 255, 255, 0.5)',
+            borderRadius: '12px',
+            border: '2px solid #8b6f47',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#3d2817', fontWeight: '500' }}>Email Notifications</span>
+              <label style={{ position: 'relative', display: 'inline-block', width: '60px', height: '30px' }}>
+                <input type="checkbox" defaultChecked style={{ opacity: 0, width: 0, height: 0 }} />
+                <span style={{
+                  position: 'absolute',
+                  cursor: 'pointer',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: '#8b6f47',
+                  transition: '0.4s',
+                  borderRadius: '30px'
+                }} />
+              </label>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#3d2817', fontWeight: '500' }}>Private Profile</span>
+              <label style={{ position: 'relative', display: 'inline-block', width: '60px', height: '30px' }}>
+                <input type="checkbox" style={{ opacity: 0, width: 0, height: 0 }} />
+                <span style={{
+                  position: 'absolute',
+                  cursor: 'pointer',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(139, 111, 71, 0.3)',
+                  transition: '0.4s',
+                  borderRadius: '30px'
+                }} />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Display Settings */}
+        <div>
+          <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#3d2817', marginBottom: '15px' }}>
+            Display Settings
+          </h4>
+          <div style={{
+            padding: '20px',
+            background: 'rgba(255, 255, 255, 0.5)',
+            borderRadius: '12px',
+            border: '2px solid #8b6f47',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px'
+          }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', color: '#3d2817', fontWeight: '500' }}>
+                Memories per page
+              </label>
+              <select style={{
+                width: '100%',
+                padding: '10px',
+                borderRadius: '8px',
+                border: '2px solid #8b6f47',
+                background: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '16px',
+                color: '#3d2817'
+              }}>
+                <option>6</option>
+                <option>9</option>
+                <option>12</option>
+                <option>18</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', color: '#3d2817', fontWeight: '500' }}>
+                Default Sort
+              </label>
+              <select style={{
+                width: '100%',
+                padding: '10px',
+                borderRadius: '8px',
+                border: '2px solid #8b6f47',
+                background: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '16px',
+                color: '#3d2817'
+              }}>
+                <option>Newest First</option>
+                <option>Oldest First</option>
+                <option>Favorites</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Privacy & Data */}
+        <div>
+          <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#3d2817', marginBottom: '15px' }}>
+            Privacy & Data
+          </h4>
+          <div style={{
+            padding: '20px',
+            background: 'rgba(255, 255, 255, 0.5)',
+            borderRadius: '12px',
+            border: '2px solid #8b6f47',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            <button style={{
+              padding: '12px',
+              background: 'transparent',
+              border: '2px solid #8b6f47',
+              borderRadius: '8px',
+              color: '#3d2817',
+              cursor: 'pointer',
+              fontWeight: '500',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(139, 111, 71, 0.1)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              Download My Data
+            </button>
+            <button style={{
+              padding: '12px',
+              background: 'transparent',
+              border: '2px solid #8b4513',
+              borderRadius: '8px',
+              color: '#8b4513',
+              cursor: 'pointer',
+              fontWeight: '500',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(139, 69, 19, 0.1)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </Modal>
+    </>
   );
 };
 
